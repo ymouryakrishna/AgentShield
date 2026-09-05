@@ -1,0 +1,114 @@
+# ==============================================================================
+# AgentShield — Git Ignore Configuration
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Dependency Directories
+# ------------------------------------------------------------------------------
+node_modules/
+*/node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+jspm_packages/
+
+# ------------------------------------------------------------------------------
+# 2. Environment Variables & Sensitive Credentials
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
+!**/.env.template
+*.pem
+*.key
+*.cert
+*.pfx
+*.pkcs12
+id_rsa*
+secrets.json
+
+# ------------------------------------------------------------------------------
+# 3. Build & Compilation Outputs
+# ------------------------------------------------------------------------------
+.next/
+out/
+dist/
+build/
+.vite/
+*/dist/
+*/build/
+**/.vite/
+.turbo/
+.output/
+.parcel-cache/
+*.tsbuildinfo
+*.timestamp-*
+vite.config.*.timestamp*
+
+
+# ------------------------------------------------------------------------------
+# 4. Logs & Debug Files
+# ------------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 5. OS & System Junk Files
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ------------------------------------------------------------------------------
+# 6. IDEs & Text Editors
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ------------------------------------------------------------------------------
+# 7. Testing, Coverage & Scratch Dirs
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+.pytest_cache/
+*.lcov
+.gemini/
+.antigravity/
+.system_generated/
+scratch/
+tmp/
+temp/
+
+# ------------------------------------------------------------------------------
+# 8. Unrelated Legacy / Standalone Templates
+# ------------------------------------------------------------------------------
+solar-mining-dashboard/
+

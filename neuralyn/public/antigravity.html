@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Gravity Website Effect — AgentShield</title>
+  
+  <!-- Matter.js 2D Physics Engine CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* Fixed floating HUD to control physics mode */
+    #ui-controls {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: flex;
+      gap: 12px;
+      background: rgba(22, 27, 34, 0.85);
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: 1px solid #30363d;
+      backdrop-filter: blur(8px);
+    }
+
+    button {
+      background: #238636;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button.alt-btn {
+      background: #30363d;
+      color: #c9d1d9;
+    }
+
+    button.alt-btn:hover {
+      background: #8b949e;
+      color: #0d1117;
+    }
+
+    /* Target physical elements that will float/fall */
+    .grav-item {
+      position: absolute;
+      will-change: transform;
+      pointer-events: auto;
+      cursor: grab;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #161b22;
+      padding: 16px 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .grav-item:active {
+      cursor: grabbing;
+    }
+
+    /* Header styling */
+    .hero-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: #58a6ff;
+      text-align: center;
+    }
+
+    /* Interactive cards */
+    .card {
+      width: 260px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #f0f6fc;
+    }
+
+    .card p {
+      font-size: 13px;
+      line-height: 1.4;
+      color: #8b949e;
+    }
+
+    /* Navigation pill items */
+    .nav-pill {
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #79c0ff;
+      border-color: #1f6feb;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls overlay -->
+  <div id="ui-controls">
+    <button id="toggle-gravity-btn">Trigger Anti-Gravity (Float Up)</button>
+    <button id="zero-gravity-btn" class="alt-btn">Zero Gravity (Float Free)</button>
+    <button id="normal-gravity-btn" class="alt-btn">Standard Downward</button>
+  </div>
+
+  <!-- Physical Web Elements -->
+  <div class="grav-item hero-title" style="top: 15%; left: calc(50% - 190px);">
+    🌌 Zero-G Playground
+  </div>
+
+  <div class="grav-item nav-pill" style="top: 28%; left: 35%;">
+    🚀 About Us
+  </div>
+
+  <div class="grav-item nav-pill" style="top: 28%; left: 52%;">
+    ⚡ Documentation
+  </div>
+
+  <div class="grav-item card" style="top: 40%; left: 20%;">
+    <h3>Modular Architecture</h3>
+    <p>Grab and toss this box anywhere across the canvas screen.</p>
+  </div>
+
+  <div class="grav-item card" style="top: 40%; left: 60%;">
+    <h3>Real-Time Rigidbodies</h3>
+    <p>Every element maintains realistic collision geometry and rotation angles.</p>
+  </div>
+
+  <div class="grav-item nav-pill" style="top: 65%; left: 45%;">
+    📦 GitHub Repository
+  </div>
+
+  <script>
+    const { Engine, World, Bodies, Mouse, MouseConstraint, Events, Body } = Matter;
+
+    // 1. Initialize Matter.js Physics Engine
+    const engine = Engine.create();
+    const world = engine.world;
+
+    // Start with gentle downward gravity by default
+    engine.gravity.x = 0;
+    engine.gravity.y = 1;
+
+    // 2. Build Screen Boundary Walls (Left, Right, Floor, Ceiling)
+    const wallThickness = 120;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    function createWalls() {
+      return [
+        // Ground
+        Bodies.rectangle(width / 2, height + wallThickness / 2, width * 2, wallThickness, { isStatic: true }),
+        // Ceiling
+        Bodies.rectangle(width / 2, -wallThickness / 2, width * 2, wallThickness, { isStatic: true }),
+        // Left wall
+        Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true }),
+        // Right wall
+        Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true })
+      ];
+    }
+
+    let walls = createWalls();
+    World.add(world, walls);
+
+    // 3. Convert DOM Elements into Rigid Physics Bodies
+    const elements = document.querySelectorAll('.grav-item');
+    const items = [];
+
+    elements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+
+      // Center coordinates of element
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      // Matter.js dynamic rectangle body
+      const body = Bodies.rectangle(x, y, rect.width, rect.height, {
+        restitution: 0.75, // Bounciness
+        friction: 0.1,
+        frictionAir: 0.02, // Air drag
+        density: 0.002
+      });
+
+      World.add(world, body);
+
+      // Fix layout style so transform updates don't break position
+      el.style.position = 'absolute';
+      el.style.left = '0px';
+      el.style.top = '0px';
+      el.style.margin = '0px';
+
+      items.push({ el, body, width: rect.width, height: rect.height });
+    });
+
+    // 4. Mouse Drag & Throw Interaction
+    const mouse = Mouse.create(document.body);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+        stiffness: 0.2,
+        render: { visible: false }
+      }
+    });
+
+    World.add(world, mouseConstraint);
+
+    // 5. Physics Sync Loop
+    function updatePhysics() {
+      Engine.update(engine, 1000 / 60);
+
+      items.forEach(({ el, body, width, height }) => {
+        const posX = body.position.x - width / 2;
+        const posY = body.position.y - height / 2;
+        const angle = body.angle;
+
+        el.style.transform = `translate3d(${posX}px, ${posY}px, 0px) rotate(${angle}rad)`;
+      });
+
+      requestAnimationFrame(updatePhysics);
+    }
+    requestAnimationFrame(updatePhysics);
+
+    // 6. Handle Window Resizing
+    window.addEventListener('resize', () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+
+      // Remove old boundaries and add updated walls
+      World.remove(world, walls);
+      walls = createWalls();
+      World.add(world, walls);
+    });
+
+    // 7. Gravity Mode Controllers
+    const toggleBtn = document.getElementById('toggle-gravity-btn');
+    const zeroBtn = document.getElementById('zero-gravity-btn');
+    const normalBtn = document.getElementById('normal-gravity-btn');
+
+    // Anti-Gravity: Upward Pull
+    toggleBtn.addEventListener('click', () => {
+      engine.gravity.y = -1.2;
+      // Provide a tiny randomized velocity burst to kick items off their surfaces
+      items.forEach(({ body }) => {
+        Body.applyForce(body, body.position, {
+          x: (Math.random() - 0.5) * 0.05,
+          y: -0.05
+        });
+      });
+    });
+
+    // Zero-G: Float Freely
+    zeroBtn.addEventListener('click', () => {
+      engine.gravity.y = 0;
+      engine.gravity.x = 0;
+      items.forEach(({ body }) => {
+        body.frictionAir = 0.04;
+      });
+    });
+
+    // Standard Gravity: Normal Drop
+    normalBtn.addEventListener('click', () => {
+      engine.gravity.y = 1;
+      engine.gravity.x = 0;
+      items.forEach(({ body }) => {
+        body.frictionAir = 0.02;
+      });
+    });
+  </script>
+</body>
+</html>

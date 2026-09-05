@@ -1,0 +1,35 @@
+{
+  "name": "agentshield-root",
+  "version": "1.0.0",
+  "description": "AgentShield: The Trust Layer for AI Commerce | Razorpay Buildathon Track 01",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "start": "cd backend && npm start",
+    "backend:install": "cd backend && npm install",
+    "frontend:install": "cd frontend && npm install",
+    "install:all": "npm run backend:install && npm run frontend:install",
+    "backend:start": "cd backend && npm start",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:test": "cd backend && npm test",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "razorpay",
+    "ai-commerce",
+    "agentic-commerce",
+    "commerce-firewall",
+    "bounded-negotiation",
+    "fintech"
+  ],
+  "author": "AgentShield Team",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^13.2.0",
+    "lucide-react": "^1.40.0",
+    "tailwind-merge": "^3.6.0"
+  }
+}
